@@ -33,7 +33,7 @@ export default function Generate() {
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
-        headers: { "Authorization": `Bearer ${'sk-6wgrZZdthA-BRClg8XscvuNSDPmUYMolF_q7vvmygqT3BlbkFJtUKxY0e3-G31U2KY8ctKADJIuOgap8a52vUWSImgwA'}`,
+        headers: { "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json", },
         body: JSON.stringify({ text }), // Ensure body is JSON.stringify
       });

@@ -16,7 +16,7 @@ You should return in the following JSON format:
 `;
 
 export async function POST(req) {
-  const OPENROUTER_API_KEY = 'sk-6wgrZZdthA-BRClg8XscvuNSDPmUYMolF_q7vvmygqT3BlbkFJtUKxY0e3-G31U2KY8ctKADJIuOgap8a52vUWSImgwA';
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
   const data = await req.text();
 
@@ -25,7 +25,7 @@ export async function POST(req) {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
