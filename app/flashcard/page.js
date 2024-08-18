@@ -252,11 +252,11 @@ export default function Flashcards({ params, searchParams }) {
                         <DeleteIcon />
                       </IconButton>
                       <IconButton color="primary" onClick={() => handleRegenerate(index)}>
-                        <RefreshIcon />
-                      </IconButton>
+                        <RefreshIcon /> 
+                        </IconButton>
                     </Box>
                   </CardContainer>
-                  </Grid>
+                </Grid>
               ))}
             </Grid>
           </Box>

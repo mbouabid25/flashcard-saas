@@ -115,7 +115,9 @@ const MyPage = () => {
                 </Grid>
               ))
             ) : (
-              <Typography>No flashcard sets found.</Typography>
+              <Grid item xs={12}>
+                <Typography sx={{ textAlign: 'center' }}>No flashcard sets found.</Typography>
+              </Grid>
             )}
           </Grid>
           {flashcardSets.length > 0 && (
@@ -131,51 +133,83 @@ const MyPage = () => {
       </Box>
 
       <Box sx={{ my: 6, textAlign: 'center' }}>
-      <Typography variant="h4" component="h2" gutterBottom>
-  Pricing
-</Typography>
-<Grid container spacing={4} justifyContent="center">
-  {/* Basic Plan */}
-  <Grid item xs={12} sm={6} md={4}>
-    <Box className={styles.pricingCard}>
-      <Typography variant="h5" gutterBottom>
-        Basic Plan
-      </Typography>
-      <Typography variant="h6" color="textSecondary" gutterBottom>
-        $0/month
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        disabled={loading}
-        onClick={() => handleCheckout('free')}
-      >
-        {loading ? 'Processing...' : 'Choose Free Plan'}
-      </Button>
-    </Box>
-  </Grid>
-  
-  {/* Pro Plan */}
-  <Grid item xs={12} sm={6} md={4}>
-    <Box className={styles.pricingCard}>
-      <Typography variant="h5" gutterBottom>
-        Pro Plan
-      </Typography>
-      <Typography variant="h6" color="textSecondary" gutterBottom>
-        $1/month
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        disabled={loading}
-        onClick={() => handleCheckout('paid', 'price_1PpEuvL0XfCTZc5C0fusAdV7')}
-      >
-        {loading ? 'Processing...' : 'Choose Pro Plan'}
-      </Button>
-    </Box>
-  </Grid>
-</Grid>
-</Box>
+        <Typography variant="h4" component="h2" gutterBottom>
+          Pricing
+        </Typography>
+        <Grid container spacing={4} justifyContent="center">
+          {/* Basic Plan */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Box
+              sx={{
+                border: '1px solid #ccc',
+                borderRadius: '10px',
+                padding: '16px',
+              }}
+            >
+              <Typography variant="h5" gutterBottom>
+                Basic Plan
+              </Typography>
+              <Typography 
+              variant="h5" 
+              gutterBottom
+              sx={{ 
+                color: 'rgb(189, 195, 199)', 
+                fontSize: '0.875rem' // This sets the font size to be smaller
+              }}
+            >
+              Limited plan. Generate up to 10 sets.
+            </Typography>
+              <Typography variant="h6" color="textSecondary" gutterBottom>
+                $0/month
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={loading}
+                onClick={() => handleCheckout('free')}
+              >
+                {loading ? 'Processing...' : 'Choose Free Plan'}
+              </Button>
+            </Box>
+          </Grid>
+          
+          {/* Pro Plan */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Box
+              sx={{
+                border: '1px solid #ccc',
+                borderRadius: '10px',
+                padding: '16px',
+              }}
+            >
+              <Typography variant="h5" gutterBottom>
+                Pro Plan
+              </Typography>
+              <Typography 
+              variant="h5" 
+              gutterBottom
+              sx={{ 
+                color: 'rgb(189, 195, 199)', 
+                fontSize: '0.875rem' // This sets the font size to be smaller
+              }}
+            >
+              Unlimited plan. The options are endless!
+            </Typography>
+              <Typography variant="h6" color="textSecondary" gutterBottom>
+                $1/month
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={loading}
+                onClick={() => handleCheckout('paid', 'price_1PpEuvL0XfCTZc5C0fusAdV7')}
+              >
+                {loading ? 'Processing...' : 'Choose Pro Plan'}
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
     </div>
   );
 };
