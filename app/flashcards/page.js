@@ -51,43 +51,63 @@ export default function FlashcardSets() {
 
   const handleDeleteClick = async (setName) => {
     if (user) {
-      try {
-        const userDocRef = doc(db, 'users', user.id);
-        const docSnap = await getDoc(userDocRef);
+        try {
+            const userDocRef = doc(db, 'users', user.id);
+            const docSnap = await getDoc(userDocRef);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data().flashcardSets || [];
-          const updatedSets = data.filter(set => set !== setName);
+            if (docSnap.exists()) {
+                const data = docSnap.data().flashcardSets || [];
+                console.log('Current flashcard sets:', data); // Debugging log
 
-          await updateDoc(userDocRef, { flashcardSets: updatedSets });
-          setFlashcardSets(updatedSets);
+                const updatedSets = data.filter(set => {
+                    const isMatch = set.name ? set.name !== setName : set !== setName;
+                    console.log(`Comparing: ${set.name || set} with ${setName} -> ${isMatch}`);
+                    return isMatch;
+                });
+
+                await updateDoc(userDocRef, { flashcardSets: updatedSets });
+                setFlashcardSets(updatedSets);
+                console.log('Flashcard set deleted successfully. Updated sets:', updatedSets);
+            } else {
+                console.log('User document does not exist.');
+            }
+        } catch (error) {
+            console.error('Error deleting flashcard set:', error);
         }
-      } catch (error) {
-        console.error('Error deleting flashcard set:', error);
-      }
     }
-  };
+};
 
-  const handleRenameSet = async () => {
-    if (user && newName.trim() !== '' && selectedSet !== newName) {
-      try {
-        const userDocRef = doc(db, 'users', user.id);
-        const docSnap = await getDoc(userDocRef);
+const handleRenameSet = async () => {
+  if (user && newName.trim() !== '' && selectedSet !== newName) {
+    try {
+      const userDocRef = doc(db, 'users', user.id);
+      const docSnap = await getDoc(userDocRef);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data().flashcardSets || [];
-          const updatedSets = data.map(set => set === selectedSet ? newName : set);
+      if (docSnap.exists()) {
+        const data = docSnap.data().flashcardSets || [];
+        console.log('Current flashcard sets:', data); // Debugging log
 
-          await updateDoc(userDocRef, { flashcardSets: updatedSets });
-          setFlashcardSets(updatedSets);
-        }
-      } catch (error) {
-        console.error('Error renaming flashcard set:', error);
+        const updatedSets = data.map(set => {
+          if (typeof set === 'string') {
+            return set === selectedSet ? newName : set;
+          } else {
+            return set.name === selectedSet ? { ...set, name: newName } : set;
+          }
+        });
+
+        await updateDoc(userDocRef, { flashcardSets: updatedSets });
+        setFlashcardSets(updatedSets);
+        console.log('Flashcard set renamed successfully. Updated sets:', updatedSets);
+      } else {
+        console.log('User document does not exist.');
       }
+    } catch (error) {
+      console.error('Error renaming flashcard set:', error);
     }
+  }
 
-    setOpenDialog(false);
-  };
+  setOpenDialog(false);
+};
 
   const handleBackToGenerate = () => {
     router.push('/generate');

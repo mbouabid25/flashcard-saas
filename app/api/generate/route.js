@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 
 const systemPrompt = `
-You are a flashcard creator. You take in text and create multiple flashcards from it. Make sure to create exactly 12 flashcards.
-Both front and back should be one sentence long.
-You should return in the following JSON format:
+You are a flashcard generator focused on creating 12 highly effective flashcards that aid in fast memorization and retention. 
+Each flashcard should have a simple question or prompt on the front and a clear, concise answer on the back. Use proven learning techniques like chunking, mnemonics, and active recall to enhance memory. 
+The language should be straightforward, making complex concepts easy to understand. Your response must be formatted strictly as valid JSON with no additional text or explanations. Only return the flashcards in the following format:
 {
   "flashcards":[
     { "front": "Question 1", "back": "Answer 1" },
