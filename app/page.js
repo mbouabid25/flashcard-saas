@@ -47,20 +47,25 @@ const MyPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ planType, priceId }), // Send both planType and priceId to the server
+        body: JSON.stringify({ planType, priceId }), // Send planType and priceId to the server
       });
   
       if (!response.ok) {
         throw new Error('Failed to create Stripe checkout session');
       }
   
-      const { id } = await response.json();
+      const checkoutSession = await response.json();
   
-      const stripe = await getStripe();
-      const { error } = await stripe.redirectToCheckout({ sessionId: id });
+      if (planType === 'free') {
+        alert(checkoutSession.message); // Handle free plan separately if needed
+        setLoading(false); // Reset loading state after alert
+      } else {
+        const stripe = await getStripe();
+        const { error } = await stripe.redirectToCheckout({ sessionId: checkoutSession.id });
   
-      if (error) {
-        console.error('Stripe Checkout Error:', error.message);
+        if (error) {
+          console.error('Stripe Checkout Error:', error.message);
+        }
       }
     } catch (error) {
       console.error('Error during checkout:', error);
@@ -126,50 +131,50 @@ const MyPage = () => {
       </Box>
 
       <Box sx={{ my: 6, textAlign: 'center' }}>
-  <Typography variant="h4" component="h2" gutterBottom>
-    Pricing
-  </Typography>
-  <Grid container spacing={4} justifyContent="center">
-    {/* Basic Plan */}
-    <Grid item xs={12} sm={6} md={4}>
-      <Box className={styles.pricingCard}>
-        <Typography variant="h5" gutterBottom>
-          Basic Plan
-        </Typography>
-        <Typography variant="h6" color="textSecondary" gutterBottom>
-          $0/month
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={loading}
-          onClick={() => handleCheckout('free')}
-        >
-          {loading ? 'Processing...' : 'Choose Free Plan'}
-        </Button>
-      </Box>
-    </Grid>
-    
-    {/* Pro Plan */}
-    <Grid item xs={12} sm={6} md={4}>
-      <Box className={styles.pricingCard}>
-        <Typography variant="h5" gutterBottom>
-          Pro Plan
-        </Typography>
-        <Typography variant="h6" color="textSecondary" gutterBottom>
-          $1/month
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={loading}
-          onClick={() => handleCheckout('paid', 'price_1PpEuvL0XfCTZc5C0fusAdV7')}
-        >
-          {loading ? 'Processing...' : 'Choose Pro Plan'}
-        </Button>
-      </Box>
-    </Grid>
+      <Typography variant="h4" component="h2" gutterBottom>
+  Pricing
+</Typography>
+<Grid container spacing={4} justifyContent="center">
+  {/* Basic Plan */}
+  <Grid item xs={12} sm={6} md={4}>
+    <Box className={styles.pricingCard}>
+      <Typography variant="h5" gutterBottom>
+        Basic Plan
+      </Typography>
+      <Typography variant="h6" color="textSecondary" gutterBottom>
+        $0/month
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        disabled={loading}
+        onClick={() => handleCheckout('free')}
+      >
+        {loading ? 'Processing...' : 'Choose Free Plan'}
+      </Button>
+    </Box>
   </Grid>
+  
+  {/* Pro Plan */}
+  <Grid item xs={12} sm={6} md={4}>
+    <Box className={styles.pricingCard}>
+      <Typography variant="h5" gutterBottom>
+        Pro Plan
+      </Typography>
+      <Typography variant="h6" color="textSecondary" gutterBottom>
+        $1/month
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        disabled={loading}
+        onClick={() => handleCheckout('paid', 'price_1PpEuvL0XfCTZc5C0fusAdV7')}
+      >
+        {loading ? 'Processing...' : 'Choose Pro Plan'}
+      </Button>
+    </Box>
+  </Grid>
+</Grid>
 </Box>
     </div>
   );
