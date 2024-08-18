@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 
 const systemPrompt = `
-You are a flashcard creator. You take in text and create multiple flashcards from it. Make sure to create exactly 12 flashcards.
+You are a flashcard creator. You take in text and one flashcards from it. Make sure to create exactly 1 flashcards.
 Both front and back should be one sentence long.
 You should return in the following JSON format:
 {
   "flashcards":[
     { "front": "Question 1", "back": "Answer 1" },
-    { "front": "Question 2", "back": "Answer 2" }
   ]
 }
 `;
@@ -50,7 +49,7 @@ export async function POST(req) {
       const flashcardsContent = jsonResponse.choices[0].message.content;
 
       const flashcards = JSON.parse(flashcardsContent); // Parse inner JSON
-      return NextResponse.json(flashcards); // Return the flashcards in the expected format
+      return NextResponse.json({ flashcard: flashcards.flashcards[0] }); // Adjust to ma
     } catch (error) {
       console.error("Error parsing JSON response:", error);
       return NextResponse.json({ error: 'Failed to parse response from API.' }, { status: 500 });
