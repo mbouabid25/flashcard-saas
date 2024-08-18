@@ -1,36 +1,90 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Flashcard-Saas
 
-First, run the development server:
+Flashcard SaaS is a web-based application that allows users to create, manage, and memorize flashcards. It is designed to facilitate quick learning through flashcards, leveraging techniques like spaced repetition, mnemonics, and simple language to make memorization more effective. The platform also integrates with Stripe for managing subscriptions, allowing users to choose between free and paid plans.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Features
+
+**User Authentication:** Secure sign-up, login, and user session management powered by Clerk.
+**Flashcard Creation:** Generate flashcards from any text input, with a focus on creating 12 cards per session using mnemonics and proven memorization techniques.
+**Flashcard Management:** Rename and delete flashcard sets directly from the dashboard.
+**Subscription Management:** Integrates with Stripe to handle both free and paid subscription plans.
+**Responsive Design:** Accessible across all devices with a clean, user-friendly interface.
+
+## Technologies Used
+
+🚀 **Next.js:** React framework for building server-side rendered (SSR) applications.  
+🔥 **Firebase:** Used for storing user data and flashcard sets.  
+🖱️ **Clerk:** Handles user authentication, login, and session management.  
+💳 **Stripe:** For processing payments and managing subscription plans.  
+💅 **Material-UI:** Provides UI components for a clean, responsive design.  
+😺 **Styled-Components:** For styling the components in a modular and maintainable way.  
+
+
+## Setup and Installation
+
+### Prerequisites
+
+	•	Node.js (v14 or above)
+	•	Firebase account with a Firestore database
+	•	Stripe account for managing payments
+	•	Clerk account for user authentication
+
+### Steps to Setup
+
+1. Clone the repository:
+
+git clone https://github.com/yourusername/flashcard-saas.git
+cd flashcard-saas
+
+2.	Install dependencies:
+   
+npm install
+
+3.	Environment Variables:
+   
+Create a .env.local file in the root directory and add the following:
+
+  ``` NEXT_PUBLIC_CLERK_FRONTEND_API=your_clerk_frontend_api
+  NEXT_PUBLIC_BASE_URL=http://localhost:3000
+  STRIPE_SECRET_KEY=your_stripe_secret_key
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+  FIREBASE_API_KEY=your_firebase_api_key
+  FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+  FIREBASE_PROJECT_ID=your_firebase_project_id
+  FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+  FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+  FIREBASE_APP_ID=your_firebase_app_id
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+4.	Firebase/Clerk/Stripe/OpenRouter Setup:
+  - Set up a Firestore database and replace the placeholders in the .env.local file with your Firebase configuration.
+  - Paste your public and secret keys for Clerk, Stripe, and OpenRouter.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
+   
+8.	Run the development server:
+    `npm run dev`
 
-To learn more about Next.js, take a look at the following resources:
+[Open](http://localhost:3000) in your browser to see the application running.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Flashcard Management
 
-## Deploy on Vercel
+- Create Flashcards: Navigate to the “Generate” page to create flashcards from any text input.
+- Manage Sets: View your flashcard sets on the dashboard. You can rename or delete any set directly from this interface.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Subscription Management
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Choose a Plan: From the “Pricing” section, choose between a free or a paid subscription plan.
+- Stripe Integration: The application will redirect you to Stripe’s checkout page to complete the subscription process.
+
+### To-Do
+
+	•	Implement advanced spaced repetition algorithms.
+	•	Add more customization options for flashcards.
+	•	Introduce a community-sharing feature for public flashcard sets.
+
