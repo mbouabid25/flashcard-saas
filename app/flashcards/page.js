@@ -1,11 +1,30 @@
-'use client'
+'use client';
 
 import { useEffect, useState } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore'; // Ensure updateDoc is imported
-import db from '../firebase'; // Ensure this path is correct
-import { useUser } from '@clerk/clerk-react'; // or '@clerk/nextjs'
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import db from '../firebase';
+import { useUser } from '@clerk/clerk-react';
 import { useRouter } from 'next/navigation';
-import { Grid, Container, Card, CardContent, Typography, Button, Box, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material'; // Import MUI components
+import {
+  Grid,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  TextField, 
+  IconButton, 
+  Menu, 
+  MenuItem, 
+  CssBaseline, 
+  useTheme
+} from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 export default function FlashcardSets() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -13,7 +32,10 @@ export default function FlashcardSets() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedSet, setSelectedSet] = useState(null);
   const [newName, setNewName] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
+  const theme = useTheme();
 
   useEffect(() => {
     async function getFlashcardSets() {
@@ -43,145 +65,190 @@ export default function FlashcardSets() {
     router.push(`/flashcard?set=${encodeURIComponent(setName)}`);
   };
 
-  const handleRenameClick = (setName) => {
+  const handleMenuClick = (event, setName) => {
+    setAnchorEl(event.currentTarget);
     setSelectedSet(setName);
-    setNewName(setName);
-    setOpenDialog(true);
+    setMenuOpen(true);
   };
 
-  const handleDeleteClick = async (setName) => {
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuOpen(false);
+  };
+
+  const handleRenameClick = () => {
+    setNewName(selectedSet);
+    setOpenDialog(true);
+    handleMenuClose();
+  };
+
+  const handleDeleteClick = async () => {
     if (user) {
-        try {
-            const userDocRef = doc(db, 'users', user.id);
-            const docSnap = await getDoc(userDocRef);
+      try {
+        const userDocRef = doc(db, 'users', user.id);
+        const docSnap = await getDoc(userDocRef);
 
-            if (docSnap.exists()) {
-                const data = docSnap.data().flashcardSets || [];
-                console.log('Current flashcard sets:', data); // Debugging log
+        if (docSnap.exists()) {
+          const data = docSnap.data().flashcardSets || [];
+          const updatedSets = data.filter((set) =>
+            typeof set === 'string' ? set !== selectedSet : set.name !== selectedSet
+          );
 
-                const updatedSets = data.filter(set => {
-                    const isMatch = set.name ? set.name !== setName : set !== setName;
-                    console.log(`Comparing: ${set.name || set} with ${setName} -> ${isMatch}`);
-                    return isMatch;
-                });
-
-                await updateDoc(userDocRef, { flashcardSets: updatedSets });
-                setFlashcardSets(updatedSets);
-                console.log('Flashcard set deleted successfully. Updated sets:', updatedSets);
-            } else {
-                console.log('User document does not exist.');
-            }
-        } catch (error) {
-            console.error('Error deleting flashcard set:', error);
+          await updateDoc(userDocRef, { flashcardSets: updatedSets });
+          setFlashcardSets(updatedSets);
+          console.log('Flashcard set deleted successfully.');
+        } else {
+          console.log('User document does not exist.');
         }
-    }
-};
-
-const handleRenameSet = async () => {
-  if (user && newName.trim() !== '' && selectedSet !== newName) {
-    try {
-      const userDocRef = doc(db, 'users', user.id);
-      const docSnap = await getDoc(userDocRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data().flashcardSets || [];
-        console.log('Current flashcard sets:', data); // Debugging log
-
-        const updatedSets = data.map(set => {
-          if (typeof set === 'string') {
-            return set === selectedSet ? newName : set;
-          } else {
-            return set.name === selectedSet ? { ...set, name: newName } : set;
-          }
-        });
-
-        await updateDoc(userDocRef, { flashcardSets: updatedSets });
-        setFlashcardSets(updatedSets);
-        console.log('Flashcard set renamed successfully. Updated sets:', updatedSets);
-      } else {
-        console.log('User document does not exist.');
+      } catch (error) {
+        console.error('Error deleting flashcard set:', error);
       }
-    } catch (error) {
-      console.error('Error renaming flashcard set:', error);
     }
-  }
 
-  setOpenDialog(false);
-};
+    handleMenuClose();
+  };
+
+  const handleRenameSet = async () => {
+    if (user && newName.trim() !== '' && selectedSet !== newName) {
+      try {
+        const userDocRef = doc(db, 'users', user.id);
+        const docSnap = await getDoc(userDocRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data().flashcardSets || [];
+          const updatedSets = data.map((set) =>
+            typeof set === 'string' ? (set === selectedSet ? newName : set) : set.name === selectedSet ? { ...set, name: newName } : set
+          );
+
+          await updateDoc(userDocRef, { flashcardSets: updatedSets });
+          setFlashcardSets(updatedSets);
+          console.log('Flashcard set renamed successfully.');
+        } else {
+          console.log('User document does not exist.');
+        }
+      } catch (error) {
+        console.error('Error renaming flashcard set:', error);
+      }
+    }
+
+    setOpenDialog(false);
+  };
 
   const handleBackToGenerate = () => {
     router.push('/generate');
   };
 
   return (
-    <Container maxWidth="md">
-      <h1>Your Flashcard Sets</h1>
-      <Button 
-        variant="contained" 
-        color="secondary" 
-        onClick={handleBackToGenerate}
-        sx={{ mb: 2 }}
-      >
-        Back to Generate
-      </Button>
-      <Grid container spacing={3} sx={{ mt: 4 }}>
-        {flashcardSets.length > 0 ? (
-          flashcardSets.map((set, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card style={{ cursor: 'pointer', position: 'relative' }}>
-                <CardContent onClick={() => handleSetClick(set.name || set)}>
-                  <Typography variant="h5" component="div">
-                    {set.name || set}
-                  </Typography>
-                </CardContent>
-                <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() => handleRenameClick(set.name || set)}
-                    sx={{ mr: 1 }}
+    <>
+      <CssBaseline />
+      <Container maxWidth="md" sx={{ textAlign: 'center', mt: 8 }}>
+        <Box>
+          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+            Your Flashcard Sets
+          </Typography>
+          <Grid container spacing={4}>
+            {flashcardSets.length > 0 ? (
+              flashcardSets.map((set, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s',
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                      },
+                      borderRadius: '16px',
+                      boxShadow: theme.shadows[5],
+                      position: 'relative',
+                    }}
+                    onClick={() => handleSetClick(set.name || set)}
                   >
-                    Rename
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    onClick={() => handleDeleteClick(set.name || set)}
-                  >
-                    Delete
-                  </Button>
-                </Box>
-              </Card>
-            </Grid>
-          ))
-        ) : (
-          <p>No flashcard sets found.</p>
-        )}
-      </Grid>
+                    <CardContent>
+                      <Typography variant="h6" component="div" sx={{ fontWeight: 'medium', color: theme.palette.text.primary }}>
+                        {set.name || set}
+                      </Typography>
+                    </CardContent>
+                    <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMenuClick(e, set.name || set);
+                        }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </Box>
+                  </Card>
+                </Grid>
+              ))
+            ) : (
+              <Typography variant="body1" sx={{ color: theme.palette.text.secondary, mt: 4 }}>
+                No flashcard sets found.
+              </Typography>
+            )}
+          </Grid>
 
-      {/* Dialog for renaming a flashcard set */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Rename Flashcard Set</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="New Set Name"
-            type="text"
-            fullWidth
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleRenameSet} color="primary">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+          <Box sx={{ mt: 4 }}>
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              onClick={handleBackToGenerate}
+              sx={{
+                px: 4,
+                py: 2,
+                borderRadius: '30px',
+                fontWeight: 'bold',
+                backgroundColor: theme.palette.primary.main,
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: theme.palette.primary.dark,
+                },
+              }}
+            >
+              Back to Generate
+            </Button>
+          </Box>
+        </Box>
+
+        {/* Dropdown Menu for Rename/Delete */}
+        <Menu
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={handleMenuClose}
+          PaperProps={{
+            elevation: 3,
+            sx: { borderRadius: '10px' },
+          }}
+        >
+          <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
+          <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
+        </Menu>
+
+        {/* Dialog for renaming a flashcard set */}
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+          <DialogTitle>Rename Flashcard Set</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="New Set Name"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDialog(false)} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleRenameSet} color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </>
   );
 }

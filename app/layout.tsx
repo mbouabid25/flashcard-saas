@@ -22,28 +22,21 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body style={{ paddingTop: '80px' }}> {/* Adjust this value as needed */}
+        <body>
           {!isAuthPage && (
             <Paper 
-              elevation={3} 
+              elevation={0} 
               sx={{
-                position: 'fixed',
-                top: '16px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                borderRadius: '12px',
-                width: '90%',
-                maxWidth: '1200px',
-                zIndex: 1100,
+                borderRadius: '0', // Removed border-radius for full-width navbar
+                width: '100%', // Full width
                 backgroundColor: 'white',
               }}
             >
               <AppBar 
                 position="static" 
                 sx={{
-                  backgroundColor: 'transparent',
+                  backgroundColor: 'white',
                   boxShadow: 'none',
-                  borderRadius: '12px',
                 }}
               >
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -59,18 +52,18 @@ export default function RootLayout({
                     }}
                   >
                     <Link href="/" passHref>
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        color: 'white', 
-                        textDecoration: 'none',
-                        '&:hover': {
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          color: 'white', 
                           textDecoration: 'none',
-                        },
-                      }}
-                      spellCheck={false}  // Disable spell check
-                    >
-                        FlashcardZ
+                          '&:hover': {
+                            textDecoration: 'none',
+                          },
+                        }}
+                        spellCheck={false}  // Disable spell check
+                      >
+                        QuizWhiz
                       </Typography>
                     </Link>
                   </Box>
@@ -110,7 +103,9 @@ export default function RootLayout({
               </AppBar>
             </Paper>
           )}
-          {children}
+          <Box sx={{ paddingTop: isAuthPage ? '0' : '80px' }}>
+            {children}
+          </Box>
         </body>
       </html>
     </ClerkProvider>

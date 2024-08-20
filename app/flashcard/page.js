@@ -2,27 +2,27 @@
 
 import { useEffect, useState } from 'react';
 import { doc, collection, getDocs, getDoc, writeBatch } from 'firebase/firestore';
-import db from '../firebase'; // Ensure this path is correct
-import { Container, Grid, Typography, Box, Button, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material'; // Import MUI components
+import db from '../firebase';
+import { Container, Grid, Typography, Box, Button, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import { useUser } from '@clerk/clerk-react';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 export default function Flashcards({ params, searchParams }) {
   const [flashcards, setFlashcards] = useState([]);
   const [flipped, setFlipped] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newFront, setNewFront] = useState(''); // For manual entry only
-  const [newBack, setNewBack] = useState('');  // For manual entry only
+  const [newFront, setNewFront] = useState('');
+  const [newBack, setNewBack] = useState('');
   const { user } = useUser();
-  const set = searchParams.set; // Assuming you pass `set` as a query parameter
-  const router = useRouter(); // For navigation
-
-  const [setPrompt, setSetPrompt] = useState(''); // Store the initial prompt used to create the set
+  const set = searchParams.set;
+  const router = useRouter();
+  const [setPrompt, setSetPrompt] = useState('');
 
   useEffect(() => {
     async function getFlashcards() {
@@ -37,7 +37,7 @@ export default function Flashcards({ params, searchParams }) {
           const currentSet = sets.find(s => s.name === set);
 
           if (currentSet) {
-            setSetPrompt(currentSet.prompt); // Store the prompt in state
+            setSetPrompt(currentSet.prompt);
 
             const colRef = collection(userDocRef, set);
             const querySnapshot = await getDocs(colRef);
@@ -67,13 +67,11 @@ export default function Flashcards({ params, searchParams }) {
         const colRef = collection(db, `users/${userId}/${set}`);
         const batch = writeBatch(db);
 
-        // Clear existing flashcards in the collection
         const existingDocs = await getDocs(colRef);
         existingDocs.forEach((doc) => {
           batch.delete(doc.ref);
         });
 
-        // Add the updated flashcards to the collection
         flashcards.forEach((flashcard) => {
           const cardDocRef = doc(colRef);
           batch.set(cardDocRef, flashcard);
@@ -98,7 +96,7 @@ export default function Flashcards({ params, searchParams }) {
 
   const handleDelete = (index) => {
     const updatedFlashcards = flashcards.filter((_, i) => i !== index);
-    setFlashcards(updatedFlashcards); // Ensure the state is updated
+    setFlashcards(updatedFlashcards);
   };
 
   const handleRegenerate = async (index) => {
@@ -111,7 +109,7 @@ export default function Flashcards({ params, searchParams }) {
           "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: originalFront }), // Regenerate based on the original front text
+        body: JSON.stringify({ text: originalFront }),
       });
 
       if (!response.ok) {
@@ -146,7 +144,7 @@ export default function Flashcards({ params, searchParams }) {
   };
 
   const handleGenerateClick = async () => {
-    console.log('Generate Flashcard clicked'); // Debugging log
+    console.log('Generate Flashcard clicked');
 
     try {
       const response = await fetch('/api/generate-single', {
@@ -155,7 +153,7 @@ export default function Flashcards({ params, searchParams }) {
           "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: setPrompt }), // Use the initial prompt stored in `setPrompt`
+        body: JSON.stringify({ text: setPrompt }),
       });
 
       if (!response.ok) {
@@ -164,16 +162,16 @@ export default function Flashcards({ params, searchParams }) {
       }
 
       const data = await response.json();
-      console.log('Generated Flashcard:', data.flashcard); // Debugging log
+      console.log('Generated Flashcard:', data.flashcard);
 
       if (data.flashcard) {
         const updatedFlashcards = [...flashcards, { ...data.flashcard }];
-        setFlashcards(updatedFlashcards); // Ensure a new array is created
+        setFlashcards(updatedFlashcards);
       } else {
         console.error('Invalid data format:', data);
       }
 
-      handleMenuClose(); // Close the dropdown menu
+      handleMenuClose();
     } catch (error) {
       console.error('Error generating flashcard:', error);
       alert(`An error occurred while generating the flashcard: ${error.message}`);
@@ -203,7 +201,6 @@ export default function Flashcards({ params, searchParams }) {
         <Button variant="contained" color="secondary" onClick={() => router.push('/flashcards')}>
           Back to Flashcard Sets
         </Button>
-        {/* Add the dropdown button for adding or generating a flashcard */}
         <Button
           variant="contained"
           color="primary"
@@ -232,18 +229,19 @@ export default function Flashcards({ params, searchParams }) {
                   <CardContainer>
                     <FlipCard flipped={flipped[index]} onClick={() => handleCardClick(index)}>
                       <CardInner>
-                        {/* Front Side */}
                         <CardFace className="front">
-                          <Typography variant="h5" component="div">
-                            {flashcard.front}
-                          </Typography>
+                          <CardContent>
+                            <Typography variant="h5" component="div">
+                              {flashcard.front}
+                            </Typography>
+                          </CardContent>
                         </CardFace>
-
-                        {/* Back Side */}
                         <CardFace className="back">
-                          <Typography variant="h5" component="div">
-                            {flashcard.back}
-                          </Typography>
+                          <CardContent>
+                            <Typography variant="h5" component="div">
+                              {flashcard.back}
+                            </Typography>
+                          </CardContent>
                         </CardFace>
                       </CardInner>
                     </FlipCard>
@@ -252,101 +250,115 @@ export default function Flashcards({ params, searchParams }) {
                         <DeleteIcon />
                       </IconButton>
                       <IconButton color="primary" onClick={() => handleRegenerate(index)}>
-                        <RefreshIcon /> 
-                        </IconButton>
+                        <RefreshIcon />
+                      </IconButton>
                     </Box>
-                  </CardContainer>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
-
-        {flashcards.length > 0 && (
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-            <Button variant="contained" color="primary" onClick={saveFlashcards}>
-              Save Flashcards
-            </Button>
-          </Box>
-        )}
-      </Box>
-
-      <Dialog open={addDialogOpen} onClose={handleCloseAddDialog}>
-        <DialogTitle>Add New Flashcard</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Front"
-            type="text"
-            fullWidth
-            value={newFront}
-            onChange={(e) => setNewFront(e.target.value)}
-          />
-          <TextField
-            margin="dense"
-            label="Back"
-            type="text"
-            fullWidth
-            value={newBack}
-            onChange={(e) => setNewBack(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseAddDialog}>Cancel</Button>
-          <Button onClick={handleAddFlashcardSubmit} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
-  );
-}
-
-// Styled Components
-const CardContainer = styled.div`
-  perspective: 1000px;
-  cursor: pointer;
-`;
-
-const FlipCard = styled.div`
-  width: 100%;
-  height: 250px; /* Set a fixed height for consistency */
-  transform-style: preserve-3d;
-  transition: transform 0.6s;
-  transform: ${(props) => (props.flipped ? 'rotateY(180deg)' : 'rotateY(0deg)')};
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1), 0px 8px 20px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
-  border: 1px solid #ccc; /* Add a subtle border */
-  border-radius: 10px; /* Rounded corners for a smooth look */
-`;
-
-const CardInner = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff; /* Ensure a white background for both sides */
-  border-radius: 10px; /* Ensure inner content matches the card's rounded corners */
-  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.1); /* Inner shadow for added depth */
-`;
-
-const CardFace = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  backface-visibility: hidden;
-  
-  &.front {
-    background-color: #fff;
-  }
-  
-  &.back {
-    background-color: #f0f0f0;
-    transform: rotateY(180deg);
-  }
-`;
+                    </CardContainer>
+                    </Grid>
+                    ))}
+                    </Grid>
+                    </Box>
+                    )}
+                        
+                                {flashcards.length > 0 && (
+                                  <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+                                    <Button variant="contained" color="primary" onClick={saveFlashcards}>
+                                      Save Flashcards
+                                    </Button>
+                                  </Box>
+                                )}
+                              </Box>
+                        
+                              <Dialog open={addDialogOpen} onClose={handleCloseAddDialog}>
+                                <DialogTitle>Add New Flashcard</DialogTitle>
+                                <DialogContent>
+                                  <TextField
+                                    autoFocus
+                                    margin="dense"
+                                    label="Front"
+                                    type="text"
+                                    fullWidth
+                                    value={newFront}
+                                    onChange={(e) => setNewFront(e.target.value)}
+                                  />
+                                  <TextField
+                                    margin="dense"
+                                    label="Back"
+                                    type="text"
+                                    fullWidth
+                                    value={newBack}
+                                    onChange={(e) => setNewBack(e.target.value)}
+                                  />
+                                </DialogContent>
+                                <DialogActions>
+                                  <Button onClick={handleCloseAddDialog}>Cancel</Button>
+                                  <Button onClick={handleAddFlashcardSubmit} color="primary">
+                                    Add
+                                  </Button>
+                                </DialogActions>
+                              </Dialog>
+                            </Container>
+                          );
+                        }
+                        
+                        // Styled Components
+                        const CardContainer = styled.div`
+                          perspective: 1000px;
+                          cursor: pointer;
+                        `;
+                        
+                        const FlipCard = styled.div`
+                          width: 100%;
+                          height: 250px; /* Set a fixed height for consistency */
+                          transform-style: preserve-3d;
+                          transition: transform 0.6s;
+                          transform: ${(props) => (props.flipped ? 'rotateY(180deg)' : 'rotateY(0deg)')};
+                          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1), 0px 8px 20px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+                          border: 1px solid #ccc; /* Add a subtle border */
+                          border-radius: 10px; /* Rounded corners for a smooth look */
+                          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Gradient background for a modern look */
+                        `;
+                        
+                        const CardInner = styled.div`
+                          position: relative;
+                          width: 100%;
+                          height: 100%;
+                          display: flex;
+                          justify-content: center;
+                          align-items: center;
+                          background-color: transparent;
+                          border-radius: 10px; /* Ensure inner content matches the card's rounded corners */
+                          box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.1); /* Inner shadow for added depth */
+                        `;
+                        
+                        const CardFace = styled.div`
+                          position: absolute;
+                          width: 100%;
+                          height: 100%;
+                          display: flex;
+                          justify-content: center;
+                          align-items: center;
+                          backface-visibility: hidden;
+                          padding: 10px;
+                          
+                          &.front {
+                            background-color: rgba(255, 255, 255, 0.9);
+                            border-radius: 10px;
+                            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                          }
+                          
+                          &.back {
+                            background-color: rgba(240, 240, 240, 0.9);
+                            border-radius: 10px;
+                            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                            transform: rotateY(180deg);
+                          }
+                        `;
+                        
+                        const CardContent = styled.div`
+                          font-family: 'Roboto', sans-serif;
+                          font-weight: 500;
+                          color: #333;
+                          text-align: center;
+                          font-size: 1.2rem;
+                        `;
