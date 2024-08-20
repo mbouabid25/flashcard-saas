@@ -8,6 +8,19 @@ import { getStripe } from '../utils/get-stripe';
 
 const MyPage = () => {
   const router = useRouter();
+  const { user } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [flashcardSets, setFlashcardSets] = useState([]);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      fetchFlashcardSets();
+    }
+  }, [user]);
+
+  const fetchFlashcardSets = async () => {
+    if (!user) return;
 
   const handleSubmit = async () => {
     try {
@@ -26,6 +39,52 @@ const MyPage = () => {
       }
     } catch (error) {
       console.error("Error during checkout:", error);
+    }
+  };
+
+
+  const handleNextCard = () => {
+    setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcardSets.length);
+  };
+
+  const handlePrevCard = () => {
+    setCurrentCardIndex((prevIndex) =>
+      prevIndex === 0 ? flashcardSets.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleCheckout = async (planType, priceId = null) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/checkout_sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planType, priceId }), // Send planType and priceId to the server
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to create Stripe checkout session');
+      }
+  
+      const checkoutSession = await response.json();
+  
+      if (planType === 'free') {
+        alert(checkoutSession.message); // Handle free plan separately if needed
+        setLoading(false); // Reset loading state after alert
+      } else {
+        const stripe = await getStripe();
+        const { error } = await stripe.redirectToCheckout({ sessionId: checkoutSession.id });
+  
+        if (error) {
+          console.error('Stripe Checkout Error:', error.message);
+        }
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
