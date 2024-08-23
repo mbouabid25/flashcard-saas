@@ -96,7 +96,9 @@ export default function RootLayout({
                       </Button>
                     </SignedOut>
                     <SignedIn>
-                      <UserButton sx={{ marginLeft: 2 }} />
+                    <Box sx={{ marginLeft: 2 }}>
+                      <UserButton />
+                    </Box>
                     </SignedIn>
                   </Box>
                 </Toolbar>
